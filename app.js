@@ -10,7 +10,8 @@ async function buscarPais(nombre) {
     throw new Error(`Error del servidor (código ${respuesta.status}).`);
   }
 
-  return await respuesta.json();
+  const datos = await respuesta.json();
+  return Array.isArray(datos) ? datos : [datos];
 }
 
 function mostrarPaises(paises) {
