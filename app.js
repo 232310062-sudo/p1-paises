@@ -1,5 +1,5 @@
 async function buscarPais(nombre) {
-  const url = `https://restcountries.com/v3.1/translation/${encodeURIComponent(nombre)}`;
+  const url = `https://restcountries.com/v3.1/name/${encodeURIComponent(nombre)}?fields=name,translations,capital,region,population,flags`;
   const respuesta = await fetch(url);
 
   if (respuesta.status === 404) {
@@ -11,7 +11,11 @@ async function buscarPais(nombre) {
   }
 
   const datos = await respuesta.json();
-  return Array.isArray(datos) ? datos : [datos];
+  if (!Array.isArray(datos) || datos.length === 0 || !datos[0].name) {
+    throw new Error("La API no devolvió datos válidos de países en esta red.");
+  }
+
+  return datos;
 }
 
 function mostrarPaises(paises) {
