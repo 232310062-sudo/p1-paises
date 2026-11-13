@@ -1,4 +1,4 @@
-const API = "https://www.apicountries.com/countries";
+const API = "https://corsproxy.io/?url=https://www.apicountries.com/countries";
 
 async function buscarPais(nombre) {
   const respuesta = await fetch(API);
