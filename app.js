@@ -1,21 +1,28 @@
-async function buscarPais(nombre) {
-  const url = `https://restcountries.com/v3.1/name/${encodeURIComponent(nombre)}?fields=name,translations,capital,region,population,flags`;
-  const respuesta = await fetch(url);
+const API = "https://www.apicountries.com/countries";
 
-  if (respuesta.status === 404) {
-    throw new Error("No se encontró ningún país con ese nombre.");
-  }
+async function buscarPais(nombre) {
+  const respuesta = await fetch(API);
 
   if (!respuesta.ok) {
     throw new Error(`Error del servidor (código ${respuesta.status}).`);
   }
 
-  const datos = await respuesta.json();
-  if (!Array.isArray(datos) || datos.length === 0 || !datos[0].name) {
-    throw new Error("La API no devolvió datos válidos de países en esta red.");
+  const todos = await respuesta.json();
+  const termino = nombre.toLowerCase().trim();
+
+  // Filtra por nombre común, oficial o traducción en español
+  const encontrados = todos.filter(pais => {
+    const comun = (pais.name?.common || pais.name || "").toLowerCase();
+    const oficial = (pais.name?.official || "").toLowerCase();
+    const esp = (pais.translations?.spa?.common || pais.translations?.es || "").toLowerCase();
+    return comun.includes(termino) || oficial.includes(termino) || esp.includes(termino);
+  });
+
+  if (encontrados.length === 0) {
+    throw new Error("No se encontró ningún país con ese nombre.");
   }
 
-  return datos;
+  return encontrados;
 }
 
 function mostrarPaises(paises) {
@@ -23,8 +30,8 @@ function mostrarPaises(paises) {
   contenedor.innerHTML = "";
 
   paises.forEach(pais => {
-    const nombrePais = pais.translations?.spa?.common || pais.name?.common || "Sin nombre";
-    const bandera = pais.flags?.png || "";
+    const nombrePais = pais.name?.common || pais.name || "Sin nombre";
+    const bandera = pais.flags?.png || pais.flag || "";
     const capital = Array.isArray(pais.capital) ? pais.capital[0] : (pais.capital || "Sin capital");
 
     const tarjeta = document.createElement("article");
