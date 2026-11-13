@@ -1,4 +1,4 @@
-const API = "https://www.apicountries.com/countries";
+const API = "./paises.json";
 
 async function buscarPais(nombre) {
   const respuesta = await fetch(API);
@@ -8,13 +8,13 @@ async function buscarPais(nombre) {
   }
 
   const todos = await respuesta.json();
-  const termino = nombre.toLowerCase().trim();
+  const normalizar = txt => txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  const termino = normalizar(nombre);
 
-  // Filtra por nombre común, oficial o traducción en español
   const encontrados = todos.filter(pais => {
-    const comun = (pais.name?.common || pais.name || "").toLowerCase();
-    const oficial = (pais.name?.official || "").toLowerCase();
-    const esp = (pais.translations?.spa?.common || pais.translations?.es || "").toLowerCase();
+    const comun = normalizar(pais.name?.common || "");
+    const oficial = normalizar(pais.name?.official || "");
+    const esp = normalizar(pais.translations?.spa?.common || "");
     return comun.includes(termino) || oficial.includes(termino) || esp.includes(termino);
   });
 
@@ -30,8 +30,8 @@ function mostrarPaises(paises) {
   contenedor.innerHTML = "";
 
   paises.forEach(pais => {
-    const nombrePais = pais.name?.common || pais.name || "Sin nombre";
-    const bandera = pais.flags?.png || pais.flag || "";
+    const nombrePais = pais.name?.common || "Sin nombre";
+    const bandera = pais.flags?.png || "";
     const capital = Array.isArray(pais.capital) ? pais.capital[0] : (pais.capital || "Sin capital");
 
     const tarjeta = document.createElement("article");
